@@ -176,6 +176,35 @@ class CharCorruptionDataset(Dataset):
         ### [part e]: see spec above
 
         ### START CODE HERE
+        # 0. Retrieve document using idx
+        doc = self.data[idx]
+
+        # 1. Randomly truncate document
+        lb, ub = 4, int(self.block_size * 3 / 4)
+        doc_ = doc[:random.randint(lb, ub)]  # truncated doc
+
+        # 2. Break down doc_ into substrings
+        l = len(doc_)  # Length of truncated doc
+        masked_len = l // 4 + random.randint(-l // 8, l // 8)
+        split1 = random.randint(1, l - masked_len)
+        split2 = split1 + masked_len
+        prefix = doc_[:split1]
+        masked_content = doc_[split1: split2]
+        suffix = doc_[split2:]
+
+        # 3. Rearrange substrings
+        masked_string = (
+            prefix + self.MASK_CHAR + suffix + self.MASK_CHAR + masked_content
+            + self.MASK_CHAR
+        ).ljust(self.block_size, self.PAD_CHAR)
+
+        # 4. Declare example pair to predict next character
+        i, o = masked_string[:-1], masked_string[1:]
+
+        # 5. Encode to float tensors
+        x = torch.tensor(data=[self.stoi[char] for char in i], dtype=torch.long)
+        y = torch.tensor(data=[self.stoi[char] for char in o], dtype=torch.long)
+        return x, y
         ### END CODE HERE
 
         raise NotImplementedError
