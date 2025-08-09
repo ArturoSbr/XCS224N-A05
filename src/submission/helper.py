@@ -61,8 +61,11 @@ def finetune(reading_params_path, finetune_corpus_path, pretrain_dataset, block_
     trainer_obj = None #Trainer object (see trainer.py for more details)
     tconf = None #TrainerConfig object (see trainer.py for more details)
     ### START CODE HERE
-    # Params depending on case
-    finetune_dataset = NameDataset(finetune_corpus_path, block_size)
+    with open(finetune_corpus_path, 'r', encoding='utf-8') as f:
+        finetune_data = f.read()
+    finetune_dataset = NameDataset(finetune_data, pretrain_dataset)
+
+    # Set conf accordingly
     if reading_params_path:
         model.load_state_dict(
             torch.load(
